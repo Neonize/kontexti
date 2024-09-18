@@ -20,7 +20,7 @@ const WordArchive: React.FC<WordArchiveProps> = ({ onSelectWord }) => {
           date.setDate(today.getDate() - index - 1);
           return (
             <li key={index} className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
-              <span className="text-sm">{formatDate(date)}: <span className="font-semibold">{word}</span></span>
+              <span className="text-sm">{formatDate(date)}</span>
               <Button variant="outline" size="sm" onClick={() => onSelectWord(word)}>
                 Play
               </Button>

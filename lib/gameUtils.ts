@@ -1,3 +1,7 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 // Array of words for the game
 const words = [
   'apple', 'banana', 'cherry', 'date', 'elderberry',
@@ -12,48 +16,71 @@ export const getWordOfTheDay = (): string => {
   return words[index];
 };
 
-export const saveGameProgress = (attempts: Array<{ word: string; score: number }>, hintsUsed: number) => {
+export const saveGameProgress = (
+  attempts: Array<{ word: string; score: number }>,
+  hintsUsed: number,
+  pastHints: string[]
+) => {
   localStorage.setItem('kontextiAttempts', JSON.stringify(attempts));
   localStorage.setItem('kontextiHintsUsed', hintsUsed.toString());
+  localStorage.setItem('kontextiPastHints', JSON.stringify(pastHints));
   localStorage.setItem('kontextiDate', new Date().toDateString());
 };
 
 export const loadGameProgress = (): {
   attempts: Array<{ word: string; score: number }>,
   hintsUsed: number,
+  pastHints: string[],
   isNewDay: boolean
 } => {
   const savedAttempts = localStorage.getItem('kontextiAttempts');
   const savedHintsUsed = localStorage.getItem('kontextiHintsUsed');
+  const savedPastHints = localStorage.getItem('kontextiPastHints');
   const savedDate = localStorage.getItem('kontextiDate');
   const today = new Date().toDateString();
 
-  if (savedAttempts && savedHintsUsed && savedDate === today) {
+  if (savedAttempts && savedHintsUsed && savedPastHints && savedDate === today) {
     return {
       attempts: JSON.parse(savedAttempts),
       hintsUsed: parseInt(savedHintsUsed, 10),
+      pastHints: JSON.parse(savedPastHints),
       isNewDay: false
     };
   }
 
-  return { attempts: [], hintsUsed: 0, isNewDay: true };
+  return { attempts: [], hintsUsed: 0, pastHints: [], isNewDay: true };
 };
 
-// More realistic mock function for similarity calculation
-export const calculateSimilarity = (input: string, target: string): number => {
-  if (input.toLowerCase() === target.toLowerCase()) return 100;
+export const calculateSimilarity = async (input: string, target: string): Promise<number> => {
+  try {
+    const [inputEmbedding, targetEmbedding] = await Promise.all([
+      getEmbedding(input),
+      getEmbedding(target)
+    ]);
 
-  const inputChars = input.toLowerCase().split('');
-  const targetChars = target.toLowerCase().split('');
+    const similarity = cosineSimilarity(inputEmbedding, targetEmbedding);
+    return Math.round(similarity * 100);
+  } catch (error) {
+    console.error("Error calculating similarity:", error);
+    return 0;
+  }
+};
 
-  const commonChars = inputChars.filter(char => targetChars.includes(char));
-  const lengthSimilarity = 1 - Math.abs(input.length - target.length) / Math.max(input.length, target.length);
+const getEmbedding = async (text: string): Promise<number[]> => {
+  const response = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: text,
+    encoding_format: "float",
+  });
 
-  const charSimilarity = commonChars.length / Math.max(input.length, target.length);
-  const positionSimilarity = commonChars.filter((char, index) => char === targetChars[index]).length / Math.max(input.length, target.length);
+  return response.data[0].embedding;
+};
 
-  const similarity = (lengthSimilarity * 0.2 + charSimilarity * 0.4 + positionSimilarity * 0.4) * 100;
-  return Math.round(similarity);
+const cosineSimilarity = (a: number[], b: number[]): number => {
+  const dotProduct = a.reduce((sum, _, i) => sum + a[i] * b[i], 0);
+  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+  return dotProduct / (magnitudeA * magnitudeB);
 };
 
 export const getHint = (secretWord: string): string => {
@@ -82,4 +109,18 @@ export const getPastWords = (days: number): string[] => {
 
 export const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+export const getColorForScore = (score: number): string => {
+  if (score < 33) return 'bg-red-500';
+  if (score < 66) return 'bg-yellow-500';
+  return 'bg-green-500';
+};
+
+export const calculateTotalPoints = (attempts: number, hintsUsed: number): number => {
+  const basePoints = 1000;
+  const pointsPerAttempt = 50;
+  const pointsPerHint = 100;
+
+  return Math.max(0, basePoints - (attempts * pointsPerAttempt) - (hintsUsed * pointsPerHint));
 };
