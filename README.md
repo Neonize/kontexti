@@ -17,10 +17,11 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 ## Technology Stack
 
 - Frontend: Next.js 14 with TypeScript
+- Backend: Next.js API Routes
 - UI: shadcn components and Tailwind CSS
 - State Management: React Hooks
 - Animations: Framer Motion
-- API Integration: OpenAI API for text embeddings
+- API Integration: OpenAI API for text embeddings (server-side only)
 - Theming: next-themes for dark mode support
 
 ## Getting Started
@@ -46,6 +47,7 @@ To run the Kontexti game locally, follow these steps:
    
    IMPORTANT: 
    - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at https://openai.com/ and create an API key.
+   - The API key is only used server-side in the API route, ensuring it's not exposed to the client.
    - Keep your API key secret! Never commit your `.env.local` file to version control or share it publicly.
    - If you accidentally expose your API key, immediately revoke it and generate a new one from your OpenAI account dashboard.
 
@@ -55,6 +57,38 @@ To run the Kontexti game locally, follow these steps:
    ```
 
 5. Open your browser and navigate to `http://localhost:3000`
+
+## Verifying the Setup
+
+To ensure that your setup is working correctly, especially the API endpoint for similarity calculation:
+
+1. Start the development server if it's not already running.
+2. Open a new terminal window and use curl (or any API testing tool) to send a POST request to the similarity calculation endpoint:
+
+   ```
+   curl -X POST http://localhost:3000/api/calculate-similarity \
+   -H "Content-Type: application/json" \
+   -d '{"input":"apple", "target":"fruit"}'
+   ```
+
+3. You should receive a JSON response with a similarity score. For example:
+
+   ```
+   {"score": 76}
+   ```
+
+4. If you receive an error or no response, check the following:
+   - Ensure your OPENAI_API_KEY is correctly set in the .env.local file.
+   - Check the server logs for any error messages.
+   - Verify that your OpenAI account has sufficient credits.
+
+## API Structure
+
+The application uses a Next.js API route to handle similarity calculations:
+
+- `/api/calculate-similarity`: POST request that takes `input` and `target` words and returns a similarity score.
+
+This structure keeps the OpenAI API calls on the server-side, ensuring the API key remains secure.
 
 ## Deployment
 
@@ -108,6 +142,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Security Note
 
-Never share your OpenAI API key or commit it to version control. The `.env.local` file is included in `.gitignore` to prevent accidental commits. If you believe your API key has been exposed, revoke it immediately from your OpenAI account and generate a new one.
-
-IMPORTANT: If you've cloned this repository before [DATE], please generate a new OpenAI API key, as the previous one was accidentally exposed and has been revoked.
+Never share your OpenAI API key or commit it to version control. The `.env.local` file is included in `.gitignore` to prevent accidental commits. The API key is only used server-side, ensuring it's not exposed to the client. If you believe your API key has been exposed, revoke it immediately from your OpenAI account and generate a new one.

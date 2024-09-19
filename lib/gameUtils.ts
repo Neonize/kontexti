@@ -1,7 +1,3 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 // Array of words for the game
 const words = [
   'apple', 'banana', 'cherry', 'date', 'elderberry',
@@ -53,34 +49,24 @@ export const loadGameProgress = (): {
 
 export const calculateSimilarity = async (input: string, target: string): Promise<number> => {
   try {
-    const [inputEmbedding, targetEmbedding] = await Promise.all([
-      getEmbedding(input),
-      getEmbedding(target)
-    ]);
+    const response = await fetch('/api/calculate-similarity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ input, target }),
+    });
 
-    const similarity = cosineSimilarity(inputEmbedding, targetEmbedding);
-    return Math.round(similarity * 100);
+    if (!response.ok) {
+      throw new Error('Failed to calculate similarity');
+    }
+
+    const data = await response.json();
+    return data.score;
   } catch (error) {
     console.error("Error calculating similarity:", error);
     return 0;
   }
-};
-
-const getEmbedding = async (text: string): Promise<number[]> => {
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text,
-    encoding_format: "float",
-  });
-
-  return response.data[0].embedding;
-};
-
-const cosineSimilarity = (a: number[], b: number[]): number => {
-  const dotProduct = a.reduce((sum, _, i) => sum + a[i] * b[i], 0);
-  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-  return dotProduct / (magnitudeA * magnitudeB);
 };
 
 export const getHint = (secretWord: string): string => {
