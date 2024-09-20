@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -34,12 +34,14 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [usedHints, setUsedHints] = useState<Set<string>>(new Set());
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const initializeGame = async () => {
       setIsLoading(true);
       const word = customWord || getWordOfTheDay();
-      setSecretWord(word);
+      setSecretWord(word.toLowerCase());
 
       if (!customWord) {
         const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewDay } = loadGameProgress();
@@ -47,27 +49,30 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           setAttempts(savedAttempts);
           setHintsUsed(savedHintsUsed);
           setPastHints(savedPastHints);
+          setUsedHints(new Set(savedPastHints));
           setGameWon(savedAttempts.some(attempt => attempt.score === 100));
         } else {
-          setAttempts([]);
-          setHintsUsed(0);
-          setPastHints([]);
-          setGameWon(false);
+          resetGame();
         }
       } else {
-        setAttempts([]);
-        setHintsUsed(0);
-        setPastHints([]);
-        setGameWon(false);
+        resetGame();
       }
-      setGameOver(false);
-      setCurrentHint('');
-      setTotalPoints(0);
       setIsLoading(false);
     };
 
     initializeGame();
   }, [customWord]);
+
+  const resetGame = () => {
+    setAttempts([]);
+    setHintsUsed(0);
+    setPastHints([]);
+    setUsedHints(new Set());
+    setGameWon(false);
+    setGameOver(false);
+    setCurrentHint('');
+    setTotalPoints(0);
+  };
 
   useEffect(() => {
     if (!customWord) {
@@ -80,8 +85,9 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
     if (input.trim() === '' || isCalculating) return;
 
     setIsCalculating(true);
-    const score = await calculateSimilarity(input, secretWord);
-    const newAttempt = { word: input, score };
+    const trimmedInput = input.trim().toLowerCase();
+    const score = await calculateSimilarity(trimmedInput, secretWord);
+    const newAttempt = { word: trimmedInput, score };
     const updatedAttempts = [...attempts, newAttempt].sort((a, b) => b.score - a.score);
     setAttempts(updatedAttempts);
     setInput('');
@@ -92,10 +98,19 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       setGameOver(true);
       setTotalPoints(calculateTotalPoints(updatedAttempts.length, hintsUsed));
     }
+
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
   const handleHint = () => {
-    const hint = getHint(secretWord);
+    let hint: string;
+    do {
+      hint = getHint(secretWord);
+    } while (usedHints.has(hint));
+
+    setUsedHints(new Set(usedHints).add(hint));
     if (currentHint) {
       setPastHints([...pastHints, currentHint]);
     }
@@ -124,12 +139,35 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   return (
     <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Kontexti</h2>
+      <div className="mb-4 flex flex-col items-center">
+        <h2 className="text-3xl font-bold mb-2">Kontexti</h2>
         <Badge variant={customWord ? "secondary" : "default"} className="cursor-pointer" onClick={onResetToDaily}>
           {customWord ? "Archive Word" : `Today's Word (${formatDate(new Date())})`}
         </Badge>
       </div>
+
+      {gameOver && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className={`mb-4 text-center p-4 rounded ${gameWon ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}
+        >
+          {gameWon ? (
+            <>
+              <h2 className="text-2xl font-bold text-green-800 dark:text-green-200">Congratulations!</h2>
+              <p className="text-green-700 dark:text-green-300">You guessed the word: <span className="font-bold">{secretWord}</span></p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-red-800 dark:text-red-200">Game Over</h2>
+              <p className="text-red-700 dark:text-red-300">The word was: <span className="font-bold">{secretWord}</span></p>
+            </>
+          )}
+          <p className="mt-2 font-semibold">Total Points: {totalPoints}</p>
+        </motion.div>
+      )}
+
       <form onSubmit={handleSubmit} className="mb-4">
         <Input
           type="text"
@@ -138,6 +176,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           placeholder="Enter a word"
           className="mb-2"
           disabled={gameOver || isCalculating}
+          ref={inputRef}
         />
         <div className="flex gap-2">
           <Button type="submit" disabled={gameOver || isCalculating} className="flex-1">
@@ -190,28 +229,6 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           ))}
         </ul>
       </div>
-
-      {gameOver && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className={`mt-4 text-center p-4 rounded ${gameWon ? 'bg-green-100 dark:bg-green-800' : 'bg-red-100 dark:bg-red-800'}`}
-        >
-          {gameWon ? (
-            <>
-              <h2 className="text-2xl font-bold text-green-800 dark:text-green-200">Congratulations!</h2>
-              <p className="text-green-700 dark:text-green-300">You guessed the word: <span className="font-bold">{secretWord}</span></p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-bold text-red-800 dark:text-red-200">Game Over</h2>
-              <p className="text-red-700 dark:text-red-300">The word was: <span className="font-bold">{secretWord}</span></p>
-            </>
-          )}
-          <p className="mt-2 font-semibold">Total Points: {totalPoints}</p>
-        </motion.div>
-      )}
     </Card>
   );
 };

@@ -1,3 +1,5 @@
+import fetch from 'node-fetch';
+
 // Array of words for the game
 const words = [
   'apple', 'banana', 'cherry', 'date', 'elderberry',
@@ -9,7 +11,7 @@ const words = [
 export const getWordOfTheDay = (): string => {
   const today = new Date();
   const index = (today.getFullYear() * 100 + today.getMonth() * 31 + today.getDate()) % words.length;
-  return words[index];
+  return words[index].toLowerCase();
 };
 
 export const saveGameProgress = (
@@ -54,7 +56,7 @@ export const calculateSimilarity = async (input: string, target: string): Promis
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ input, target }),
+      body: JSON.stringify({ input: input.toLowerCase(), target: target.toLowerCase() }),
     });
 
     if (!response.ok) {
@@ -76,7 +78,7 @@ export const getHint = (secretWord: string): string => {
     `The word ends with "${secretWord[secretWord.length - 1]}"`,
     `The word contains the letter "${secretWord[Math.floor(secretWord.length / 2)]}"`,
   ];
-  return hints[Math.floor(Math.random() * hints.length)];
+  return hints[Math.floor(Math.random() * hints.length)].toLowerCase();
 };
 
 export const getPastWords = (days: number): string[] => {
@@ -87,7 +89,7 @@ export const getPastWords = (days: number): string[] => {
     const pastDate = new Date(today);
     pastDate.setDate(today.getDate() - i);
     const index = (pastDate.getFullYear() * 100 + pastDate.getMonth() * 31 + pastDate.getDate()) % words.length;
-    pastWords.push(words[index]);
+    pastWords.push(words[index].toLowerCase());
   }
 
   return pastWords;

@@ -6,6 +6,7 @@ import KontextiGame from '../components/KontextiGame';
 import WordArchive from '../components/WordArchive';
 import GameInstructions from '../components/GameInstructions';
 import { getWordOfTheDay } from '../lib/gameUtils';
+import { ThemeToggle } from '../components/theme-toggle';
 
 export default function Home() {
   const [currentWord, setCurrentWord] = useState<string>(getWordOfTheDay());
@@ -20,7 +21,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-4 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <header className="w-full max-w-4xl text-center mb-8">
+      <header className="w-full max-w-4xl text-center mb-8 flex flex-col items-center">
         <motion.h1
           className="text-4xl font-bold mb-2 cursor-pointer"
           initial={{ opacity: 0, y: -20 }}
@@ -31,13 +32,14 @@ export default function Home() {
           Kontexti
         </motion.h1>
         <motion.p
-          className="text-gray-600 dark:text-gray-400"
+          className="text-gray-600 dark:text-gray-400 mb-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           Guess the word based on semantic similarity!
         </motion.p>
+        <ThemeToggle />
       </header>
       <motion.main
         className="w-full max-w-4xl flex flex-col lg:flex-row gap-8"
