@@ -1,34 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import KontextiGame from '../components/KontextiGame';
 import WordArchive from '../components/WordArchive';
 import GameInstructions from '../components/GameInstructions';
 import { getWordOfTheDay } from '../lib/gameUtils';
-import { useTheme } from 'next-themes';
 
 export default function Home() {
-  const [currentWord, setCurrentWord] = useState<string>('');
-  const [isCustomWord, setIsCustomWord] = useState<boolean>(false);
-  const { theme, setTheme } = useTheme();
-
-  useEffect(() => {
-    setCurrentWord(getWordOfTheDay());
-  }, []);
+  const [currentWord, setCurrentWord] = useState<string>(getWordOfTheDay());
 
   const handleSelectWord = (word: string) => {
     setCurrentWord(word);
-    setIsCustomWord(true);
   };
 
   const handleResetToDaily = () => {
     setCurrentWord(getWordOfTheDay());
-    setIsCustomWord(false);
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (
@@ -51,12 +38,6 @@ export default function Home() {
         >
           Guess the word based on semantic similarity!
         </motion.p>
-        <button
-          onClick={toggleTheme}
-          className="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-md"
-        >
-          Toggle {theme === 'light' ? 'Dark' : 'Light'} Mode
-        </button>
       </header>
       <motion.main
         className="w-full max-w-4xl flex flex-col lg:flex-row gap-8"
@@ -67,7 +48,7 @@ export default function Home() {
         <div className="flex-1">
           <KontextiGame
             key={currentWord}
-            customWord={isCustomWord ? currentWord : undefined}
+            customWord={currentWord !== getWordOfTheDay() ? currentWord : undefined}
             onResetToDaily={handleResetToDaily}
           />
         </div>

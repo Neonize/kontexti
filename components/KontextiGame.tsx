@@ -4,6 +4,7 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
+import { Skeleton } from './ui/skeleton';
 import {
   getWordOfTheDay,
   saveGameProgress,
@@ -31,9 +32,12 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   const [pastHints, setPastHints] = useState<string[]>([]);
   const [currentHint, setCurrentHint] = useState<string>('');
   const [totalPoints, setTotalPoints] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
   useEffect(() => {
-    const initializeGame = () => {
+    const initializeGame = async () => {
+      setIsLoading(true);
       const word = customWord || getWordOfTheDay();
       setSecretWord(word);
 
@@ -59,6 +63,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       setGameOver(false);
       setCurrentHint('');
       setTotalPoints(0);
+      setIsLoading(false);
     };
 
     initializeGame();
@@ -72,13 +77,15 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() === '') return;
+    if (input.trim() === '' || isCalculating) return;
 
+    setIsCalculating(true);
     const score = await calculateSimilarity(input, secretWord);
     const newAttempt = { word: input, score };
     const updatedAttempts = [...attempts, newAttempt].sort((a, b) => b.score - a.score);
     setAttempts(updatedAttempts);
     setInput('');
+    setIsCalculating(false);
 
     if (score === 100) {
       setGameWon(true);
@@ -89,8 +96,10 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   const handleHint = () => {
     const hint = getHint(secretWord);
+    if (currentHint) {
+      setPastHints([...pastHints, currentHint]);
+    }
     setCurrentHint(hint);
-    setPastHints([...pastHints, hint]);
     setHintsUsed(hintsUsed + 1);
   };
 
@@ -98,6 +107,20 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
     setGameOver(true);
     setTotalPoints(0);
   };
+
+  if (isLoading) {
+    return (
+      <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
+        <Skeleton className="w-full h-8 mb-4" />
+        <Skeleton className="w-full h-10 mb-2" />
+        <div className="flex gap-2">
+          <Skeleton className="w-1/3 h-10" />
+          <Skeleton className="w-1/3 h-10" />
+          <Skeleton className="w-1/3 h-10" />
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
@@ -114,11 +137,11 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter a word"
           className="mb-2"
-          disabled={gameOver}
+          disabled={gameOver || isCalculating}
         />
         <div className="flex gap-2">
-          <Button type="submit" disabled={gameOver} className="flex-1">
-            Submit
+          <Button type="submit" disabled={gameOver || isCalculating} className="flex-1">
+            {isCalculating ? 'Calculating...' : 'Submit'}
           </Button>
           <Button type="button" variant="outline" onClick={handleHint} disabled={gameOver || hintsUsed >= 3} className="flex-1">
             Hint ({3 - hintsUsed})

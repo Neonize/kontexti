@@ -10,9 +10,10 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 - Hint system (3 hints per game) with past hints display
 - Progress saving using local storage
 - Archive of past words for continuous play
-- Dark mode support
+- Dark mode support (follows system preference)
 - Responsive design for various screen sizes
 - Total points calculation based on attempts and hints used
+- Loading states for better user experience
 
 ## Technology Stack
 
@@ -22,41 +23,36 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 - State Management: React Hooks
 - Animations: Framer Motion
 - API Integration: OpenAI API for text embeddings (server-side only)
-- Theming: next-themes for dark mode support
 
 ## Getting Started
 
 To run the Kontexti game locally, follow these steps:
 
 1. Clone the repository:
-
-   ```bash
+   ```
    git clone https://github.com/your-username/kontexti.git
    cd kontexti
    ```
 
 2. Install dependencies:
-
-   ```bash
+   ```
    npm install
    ```
 
 3. Set up environment variables:
    Create a `.env.local` file in the root directory and add your OpenAI API key:
-
-   ```bash
+   ```
    OPENAI_API_KEY=your_api_key_here
    ```
-
-   IMPORTANT:
-   - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at <https://openai.com/> and create an API key.
+   
+   IMPORTANT: 
+   - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at https://openai.com/ and create an API key.
    - The API key is only used server-side in the API route, ensuring it's not exposed to the client.
    - Keep your API key secret! Never commit your `.env.local` file to version control or share it publicly.
    - If you accidentally expose your API key, immediately revoke it and generate a new one from your OpenAI account dashboard.
 
 4. Run the development server:
-
-   ```bash
+   ```
    npm run dev
    ```
 
@@ -69,7 +65,7 @@ To ensure that your setup is working correctly, especially the API endpoint for 
 1. Start the development server if it's not already running.
 2. Open a new terminal window and use curl (or any API testing tool) to send a POST request to the similarity calculation endpoint:
 
-   ```bash
+   ```
    curl -X POST http://localhost:3000/api/calculate-similarity \
    -H "Content-Type: application/json" \
    -d '{"input":"apple", "target":"fruit"}'
@@ -77,7 +73,7 @@ To ensure that your setup is working correctly, especially the API endpoint for 
 
 3. You should receive a JSON response with a similarity score. For example:
 
-   ```bash
+   ```
    {"score": 76}
    ```
 
@@ -85,38 +81,6 @@ To ensure that your setup is working correctly, especially the API endpoint for 
    - Ensure your OPENAI_API_KEY is correctly set in the .env.local file.
    - Check the server logs for any error messages.
    - Verify that your OpenAI account has sufficient credits.
-
-## API Structure
-
-The application uses a Next.js API route to handle similarity calculations:
-
-- `/api/calculate-similarity`: POST request that takes `input` and `target` words and returns a similarity score.
-
-This structure keeps the OpenAI API calls on the server-side, ensuring the API key remains secure.
-
-## Deployment
-
-To deploy Kontexti to a production environment, follow these steps:
-
-1. Build the production-ready application:
-
-   ```bash
-   npm run build
-   ```
-
-2. Start the production server:
-
-   ```bash
-   npm start
-   ```
-
-For cloud deployment (e.g., Vercel, Netlify):
-
-1. Connect your GitHub repository to your preferred cloud platform.
-2. Configure the environment variables (OPENAI_API_KEY) in the platform's settings.
-3. Deploy the application following the platform's deployment process.
-
-Remember to keep your API keys and other sensitive information secure when deploying.
 
 ## How to Play
 
