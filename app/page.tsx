@@ -39,13 +39,19 @@ export default function Home() {
         >
           Guess the word based on semantic similarity!
         </motion.p>
-        <ThemeToggle />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <ThemeToggle />
+        </motion.div>
       </header>
       <motion.main
         className="w-full max-w-4xl flex flex-col lg:flex-row gap-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
       >
         <div className="flex-1">
           <KontextiGame

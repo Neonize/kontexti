@@ -17,31 +17,34 @@ export const getWordOfTheDay = (): string => {
 export const saveGameProgress = (
   attempts: Array<{ word: string; score: number }>,
   hintsUsed: number,
-  pastHints: string[]
+  pastHints: string[],
+  date: string
 ) => {
-  localStorage.setItem('kontextiAttempts', JSON.stringify(attempts));
-  localStorage.setItem('kontextiHintsUsed', hintsUsed.toString());
-  localStorage.setItem('kontextiPastHints', JSON.stringify(pastHints));
-  localStorage.setItem('kontextiDate', new Date().toDateString());
+  const gameState = {
+    attempts,
+    hintsUsed,
+    pastHints,
+    date
+  };
+  const savedStates = JSON.parse(localStorage.getItem('kontextiGameStates') || '{}');
+  savedStates[date] = gameState;
+  localStorage.setItem('kontextiGameStates', JSON.stringify(savedStates));
 };
 
-export const loadGameProgress = (): {
+export const loadGameProgress = (date: string): {
   attempts: Array<{ word: string; score: number }>,
   hintsUsed: number,
   pastHints: string[],
   isNewDay: boolean
 } => {
-  const savedAttempts = localStorage.getItem('kontextiAttempts');
-  const savedHintsUsed = localStorage.getItem('kontextiHintsUsed');
-  const savedPastHints = localStorage.getItem('kontextiPastHints');
-  const savedDate = localStorage.getItem('kontextiDate');
-  const today = new Date().toDateString();
+  const savedStates = JSON.parse(localStorage.getItem('kontextiGameStates') || '{}');
+  const savedState = savedStates[date];
 
-  if (savedAttempts && savedHintsUsed && savedPastHints && savedDate === today) {
+  if (savedState) {
     return {
-      attempts: JSON.parse(savedAttempts),
-      hintsUsed: parseInt(savedHintsUsed, 10),
-      pastHints: JSON.parse(savedPastHints),
+      attempts: savedState.attempts,
+      hintsUsed: savedState.hintsUsed,
+      pastHints: savedState.pastHints,
       isNewDay: false
     };
   }

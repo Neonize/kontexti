@@ -43,8 +43,9 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       const word = customWord || getWordOfTheDay();
       setSecretWord(word.toLowerCase());
 
+      const today = new Date().toDateString();
       if (!customWord) {
-        const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewDay } = loadGameProgress();
+        const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewDay } = loadGameProgress(today);
         if (!isNewDay) {
           setAttempts(savedAttempts);
           setHintsUsed(savedHintsUsed);
@@ -76,7 +77,8 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   useEffect(() => {
     if (!customWord) {
-      saveGameProgress(attempts, hintsUsed, pastHints);
+      const today = new Date().toDateString();
+      saveGameProgress(attempts, hintsUsed, pastHints, today);
     }
   }, [attempts, hintsUsed, pastHints, customWord]);
 
@@ -84,8 +86,18 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
     e.preventDefault();
     if (input.trim() === '' || isCalculating) return;
 
-    setIsCalculating(true);
     const trimmedInput = input.trim().toLowerCase();
+
+    // Check if the word is already in the list of guesses
+    if (attempts.some(attempt => attempt.word === trimmedInput)) {
+      setInput('');
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+      return;
+    }
+
+    setIsCalculating(true);
     const score = await calculateSimilarity(trimmedInput, secretWord);
     const newAttempt = { word: trimmedInput, score };
     const updatedAttempts = [...attempts, newAttempt].sort((a, b) => b.score - a.score);
@@ -174,7 +186,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter a word"
-          className="mb-2"
+          className="mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           disabled={gameOver || isCalculating}
           ref={inputRef}
         />
