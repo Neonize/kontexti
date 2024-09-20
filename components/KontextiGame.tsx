@@ -13,7 +13,8 @@ import {
   getHint,
   formatDate,
   getColorForScore,
-  calculateTotalPoints
+  calculateTotalPoints,
+  getDateForWord
 } from '../lib/gameUtils';
 import { motion } from 'framer-motion';
 
@@ -43,18 +44,14 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       const word = customWord || getWordOfTheDay();
       setSecretWord(word.toLowerCase());
 
-      const today = new Date().toDateString();
-      if (!customWord) {
-        const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewDay } = loadGameProgress(today);
-        if (!isNewDay) {
-          setAttempts(savedAttempts);
-          setHintsUsed(savedHintsUsed);
-          setPastHints(savedPastHints);
-          setUsedHints(new Set(savedPastHints));
-          setGameWon(savedAttempts.some(attempt => attempt.score === 100));
-        } else {
-          resetGame();
-        }
+      const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewGame } = loadGameProgress(word);
+      if (!isNewGame) {
+        setAttempts(savedAttempts);
+        setHintsUsed(savedHintsUsed);
+        setPastHints(savedPastHints);
+        setUsedHints(new Set(savedPastHints));
+        setGameWon(savedAttempts.some(attempt => attempt.score === 100));
+        setGameOver(savedAttempts.some(attempt => attempt.score === 100));
       } else {
         resetGame();
       }
@@ -76,11 +73,8 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   };
 
   useEffect(() => {
-    if (!customWord) {
-      const today = new Date().toDateString();
-      saveGameProgress(attempts, hintsUsed, pastHints, today);
-    }
-  }, [attempts, hintsUsed, pastHints, customWord]);
+    saveGameProgress(secretWord, attempts, hintsUsed, pastHints);
+  }, [secretWord, attempts, hintsUsed, pastHints]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,7 +148,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       <div className="mb-4 flex flex-col items-center">
         <h2 className="text-3xl font-bold mb-2">Kontexti</h2>
         <Badge variant={customWord ? "secondary" : "default"} className="cursor-pointer" onClick={onResetToDaily}>
-          {customWord ? "Archive Word" : `Today's Word (${formatDate(new Date())})`}
+          {customWord ? "Archive Word" : `Word for ${getDateForWord(secretWord)}`}
         </Badge>
       </div>
 
