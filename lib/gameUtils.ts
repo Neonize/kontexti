@@ -14,7 +14,7 @@ export const getWordOfTheDay = (): string => {
   return words[index].toLowerCase();
 };
 
-interface GameState {
+export interface GameState {
   attempts: Array<{ word: string; score: number }>;
   hintsUsed: number;
   pastHints: string[];
