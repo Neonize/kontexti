@@ -26,7 +26,7 @@ interface KontextiGameProps {
 const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily }) => {
   const [secretWord, setSecretWord] = useState<string>('');
   const [input, setInput] = useState<string>('');
-  const [attempts, setAttempts] = useState<Array<{ word: string; score: number }>>([]);
+  const [attempts, setAttempts] = useState<Array<{ word: string; score: number | null }>>([]);
   const [gameWon, setGameWon] = useState<boolean>(false);
   const [givenUp, setGivenUp] = useState<boolean>(false);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
@@ -34,7 +34,6 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   const [currentHint, setCurrentHint] = useState<string>('');
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -71,7 +70,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   useEffect(() => {
     const gameState: GameState = {
-      attempts,
+      attempts: attempts.filter(a => a.score !== null) as Array<{ word: string; score: number }>,
       hintsUsed,
       pastHints,
       gameWon,
@@ -82,7 +81,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() === '' || isCalculating || gameWon || givenUp) return;
+    if (input.trim() === '' || gameWon || givenUp) return;
 
     const trimmedInput = input.trim().toLowerCase();
 
@@ -95,17 +94,22 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       return;
     }
 
-    setIsCalculating(true);
-    const score = await calculateSimilarity(trimmedInput, secretWord);
-    const newAttempt = { word: trimmedInput, score };
-    const updatedAttempts = [...attempts, newAttempt].sort((a, b) => b.score - a.score);
-    setAttempts(updatedAttempts);
+    // Add the new attempt with a null score (loading state)
+    setAttempts(prev => [...prev, { word: trimmedInput, score: null }]);
     setInput('');
-    setIsCalculating(false);
+
+    // Calculate the similarity
+    const score = await calculateSimilarity(trimmedInput, secretWord);
+
+    // Update the attempt with the actual score
+    setAttempts(prev => {
+      const updated = prev.map(a => a.word === trimmedInput ? { ...a, score } : a);
+      return updated.sort((a, b) => (b.score || 0) - (a.score || 0));
+    });
 
     if (score === 100) {
       setGameWon(true);
-      setTotalPoints(calculateTotalPoints(updatedAttempts.length, hintsUsed));
+      setTotalPoints(calculateTotalPoints(attempts.length + 1, hintsUsed));
     }
 
     if (inputRef.current) {
@@ -187,12 +191,12 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter a word"
           className="mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          disabled={gameWon || givenUp || isCalculating}
+          disabled={gameWon || givenUp}
           ref={inputRef}
         />
         <div className="flex gap-2">
-          <Button type="submit" disabled={gameWon || givenUp || isCalculating} className="flex-1">
-            {isCalculating ? 'Calculating...' : 'Submit'}
+          <Button type="submit" disabled={gameWon || givenUp} className="flex-1">
+            Submit
           </Button>
           <Button type="button" variant="outline" onClick={handleHint} disabled={gameWon || givenUp || hintsUsed >= 3} className="flex-1">
             Hint ({3 - hintsUsed})
@@ -234,8 +238,14 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
             >
               <span>{attempt.word}</span>
               <div className="flex items-center gap-2">
-                <Progress value={attempt.score} className={`w-24 ${getColorForScore(attempt.score)}`} />
-                <span className="text-sm font-semibold">{attempt.score}%</span>
+                {attempt.score === null ? (
+                  <Skeleton className="w-24 h-4" />
+                ) : (
+                  <>
+                    <Progress value={attempt.score} className={`w-24 ${getColorForScore(attempt.score)}`} />
+                    <span className="text-sm font-semibold">{attempt.score}%</span>
+                  </>
+                )}
               </div>
             </motion.li>
           ))}
