@@ -14,7 +14,7 @@ import {
   formatDate,
   getColorForScore,
   calculateTotalPoints,
-  getDateForWord
+  GameState
 } from '../lib/gameUtils';
 import { motion } from 'framer-motion';
 
@@ -28,14 +28,13 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   const [input, setInput] = useState<string>('');
   const [attempts, setAttempts] = useState<Array<{ word: string; score: number }>>([]);
   const [gameWon, setGameWon] = useState<boolean>(false);
-  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [givenUp, setGivenUp] = useState<boolean>(false);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
   const [pastHints, setPastHints] = useState<string[]>([]);
   const [currentHint, setCurrentHint] = useState<string>('');
   const [totalPoints, setTotalPoints] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
-  const [usedHints, setUsedHints] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,14 +43,13 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       const word = customWord || getWordOfTheDay();
       setSecretWord(word.toLowerCase());
 
-      const { attempts: savedAttempts, hintsUsed: savedHintsUsed, pastHints: savedPastHints, isNewGame } = loadGameProgress(word);
-      if (!isNewGame) {
-        setAttempts(savedAttempts);
-        setHintsUsed(savedHintsUsed);
-        setPastHints(savedPastHints);
-        setUsedHints(new Set(savedPastHints));
-        setGameWon(savedAttempts.some(attempt => attempt.score === 100));
-        setGameOver(savedAttempts.some(attempt => attempt.score === 100));
+      const savedState = loadGameProgress(word);
+      if (savedState) {
+        setAttempts(savedState.attempts);
+        setHintsUsed(savedState.hintsUsed);
+        setPastHints(savedState.pastHints);
+        setGameWon(savedState.gameWon);
+        setGivenUp(savedState.givenUp);
       } else {
         resetGame();
       }
@@ -65,20 +63,26 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
     setAttempts([]);
     setHintsUsed(0);
     setPastHints([]);
-    setUsedHints(new Set());
     setGameWon(false);
-    setGameOver(false);
+    setGivenUp(false);
     setCurrentHint('');
     setTotalPoints(0);
   };
 
   useEffect(() => {
-    saveGameProgress(secretWord, attempts, hintsUsed, pastHints);
-  }, [secretWord, attempts, hintsUsed, pastHints]);
+    const gameState: GameState = {
+      attempts,
+      hintsUsed,
+      pastHints,
+      gameWon,
+      givenUp
+    };
+    saveGameProgress(secretWord, gameState);
+  }, [secretWord, attempts, hintsUsed, pastHints, gameWon, givenUp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim() === '' || isCalculating) return;
+    if (input.trim() === '' || isCalculating || gameWon || givenUp) return;
 
     const trimmedInput = input.trim().toLowerCase();
 
@@ -101,7 +105,6 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
     if (score === 100) {
       setGameWon(true);
-      setGameOver(true);
       setTotalPoints(calculateTotalPoints(updatedAttempts.length, hintsUsed));
     }
 
@@ -111,12 +114,13 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   };
 
   const handleHint = () => {
+    if (gameWon || givenUp || hintsUsed >= 3) return;
+
     let hint: string;
     do {
       hint = getHint(secretWord);
-    } while (usedHints.has(hint));
+    } while (pastHints.includes(hint));
 
-    setUsedHints(new Set(usedHints).add(hint));
     if (currentHint) {
       setPastHints([...pastHints, currentHint]);
     }
@@ -125,8 +129,10 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   };
 
   const handleGiveUp = () => {
-    setGameOver(true);
-    setTotalPoints(0);
+    if (!gameWon && !givenUp) {
+      setGivenUp(true);
+      setTotalPoints(0);
+    }
   };
 
   if (isLoading) {
@@ -148,11 +154,11 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       <div className="mb-4 flex flex-col items-center">
         <h2 className="text-3xl font-bold mb-2">Kontexti</h2>
         <Badge variant={customWord ? "secondary" : "default"} className="cursor-pointer" onClick={onResetToDaily}>
-          {customWord ? "Archive Word" : `Word for ${getDateForWord(secretWord)}`}
+          {customWord ? "Archive Word" : `Today's Word (${formatDate(new Date())})`}
         </Badge>
       </div>
 
-      {gameOver && (
+      {(gameWon || givenUp) && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -181,17 +187,17 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter a word"
           className="mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          disabled={gameOver || isCalculating}
+          disabled={gameWon || givenUp || isCalculating}
           ref={inputRef}
         />
         <div className="flex gap-2">
-          <Button type="submit" disabled={gameOver || isCalculating} className="flex-1">
+          <Button type="submit" disabled={gameWon || givenUp || isCalculating} className="flex-1">
             {isCalculating ? 'Calculating...' : 'Submit'}
           </Button>
-          <Button type="button" variant="outline" onClick={handleHint} disabled={gameOver || hintsUsed >= 3} className="flex-1">
+          <Button type="button" variant="outline" onClick={handleHint} disabled={gameWon || givenUp || hintsUsed >= 3} className="flex-1">
             Hint ({3 - hintsUsed})
           </Button>
-          <Button type="button" variant="outline" onClick={handleGiveUp} disabled={gameOver} className="flex-1">
+          <Button type="button" variant="outline" onClick={handleGiveUp} disabled={gameWon || givenUp} className="flex-1">
             Give Up
           </Button>
         </div>

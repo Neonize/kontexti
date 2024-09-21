@@ -8,59 +8,29 @@ const words = [
   'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'watermelon'
 ];
 
-export const getWordOfTheDay = (date: Date = new Date()): string => {
-  const index = (date.getFullYear() * 100 + date.getMonth() * 31 + date.getDate()) % words.length;
+export const getWordOfTheDay = (): string => {
+  const today = new Date();
+  const index = (today.getFullYear() * 100 + today.getMonth() * 31 + today.getDate()) % words.length;
   return words[index].toLowerCase();
 };
 
-export const getDateForWord = (word: string): string => {
-  const index = words.findIndex(w => w.toLowerCase() === word.toLowerCase());
-  if (index === -1) return '';
+interface GameState {
+  attempts: Array<{ word: string; score: number }>;
+  hintsUsed: number;
+  pastHints: string[];
+  gameWon: boolean;
+  givenUp: boolean;
+}
 
-  const startDate = new Date(2023, 0, 1); // Assuming the game started on Jan 1, 2023
-  const wordDate = new Date(startDate.getTime() + index * 24 * 60 * 60 * 1000);
-  return formatDate(wordDate);
-};
-
-export const saveGameProgress = (
-  word: string,
-  attempts: Array<{ word: string; score: number }>,
-  hintsUsed: number,
-  pastHints: string[]
-) => {
-  const date = getDateForWord(word);
-  const gameState = {
-    word,
-    attempts,
-    hintsUsed,
-    pastHints,
-    date
-  };
+export const saveGameProgress = (word: string, state: GameState): void => {
   const savedStates = JSON.parse(localStorage.getItem('kontextiGameStates') || '{}');
-  savedStates[date] = gameState;
+  savedStates[word] = state;
   localStorage.setItem('kontextiGameStates', JSON.stringify(savedStates));
 };
 
-export const loadGameProgress = (word: string): {
-  attempts: Array<{ word: string; score: number }>,
-  hintsUsed: number,
-  pastHints: string[],
-  isNewGame: boolean
-} => {
-  const date = getDateForWord(word);
+export const loadGameProgress = (word: string): GameState | null => {
   const savedStates = JSON.parse(localStorage.getItem('kontextiGameStates') || '{}');
-  const savedState = savedStates[date];
-
-  if (savedState && savedState.word === word) {
-    return {
-      attempts: savedState.attempts,
-      hintsUsed: savedState.hintsUsed,
-      pastHints: savedState.pastHints,
-      isNewGame: false
-    };
-  }
-
-  return { attempts: [], hintsUsed: 0, pastHints: [], isNewGame: true };
+  return savedStates[word] || null;
 };
 
 export const calculateSimilarity = async (input: string, target: string): Promise<number> => {
@@ -102,7 +72,8 @@ export const getPastWords = (days: number): string[] => {
   for (let i = 1; i <= days; i++) {
     const pastDate = new Date(today);
     pastDate.setDate(today.getDate() - i);
-    pastWords.push(getWordOfTheDay(pastDate));
+    const index = (pastDate.getFullYear() * 100 + pastDate.getMonth() * 31 + pastDate.getDate()) % words.length;
+    pastWords.push(words[index].toLowerCase());
   }
 
   return pastWords;
