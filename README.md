@@ -29,30 +29,34 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 To run the Kontexti game locally, follow these steps:
 
 1. Clone the repository:
-   ```
+
+   ```bash
    git clone https://github.com/your-username/kontexti.git
    cd kontexti
    ```
 
 2. Install dependencies:
-   ```
+
+   ```bash
    npm install
    ```
 
 3. Set up environment variables:
    Create a `.env.local` file in the root directory and add your OpenAI API key:
-   ```
+
+   ```bash
    OPENAI_API_KEY=your_api_key_here
    ```
-   
-   IMPORTANT: 
-   - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at https://openai.com/ and create an API key.
+
+   IMPORTANT:
+   - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at <https://openai.com/> and create an API key.
    - The API key is only used server-side in the API route, ensuring it's not exposed to the client.
    - Keep your API key secret! Never commit your `.env.local` file to version control or share it publicly.
    - If you accidentally expose your API key, immediately revoke it and generate a new one from your OpenAI account dashboard.
 
 4. Run the development server:
-   ```
+
+   ```bash
    npm run dev
    ```
 
@@ -65,7 +69,7 @@ To ensure that your setup is working correctly, especially the API endpoint for 
 1. Start the development server if it's not already running.
 2. Open a new terminal window and use curl (or any API testing tool) to send a POST request to the similarity calculation endpoint:
 
-   ```
+   ```bash
    curl -X POST http://localhost:3000/api/calculate-similarity \
    -H "Content-Type: application/json" \
    -d '{"input":"apple", "target":"fruit"}'
@@ -73,7 +77,7 @@ To ensure that your setup is working correctly, especially the API endpoint for 
 
 3. You should receive a JSON response with a similarity score. For example:
 
-   ```
+   ```bash
    {"score": 76}
    ```
 
