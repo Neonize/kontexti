@@ -1,12 +1,24 @@
 # Kontexti - Word Guessing Game
 
-Kontexti is a daily word guessing game where players attempt to guess a secret word by entering semantically similar words. The game provides similarity scores based on the semantic proximity of the guessed words to the secret word, using OpenAI's text embedding model.
+Kontexti is a daily word guessing game where players attempt to guess a secret word by entering semantically similar words. The game provides similarity scores based on the semantic proximity of the guessed words to the secret word, using JINA.ai's text embedding model.
+
+## AI RESEARCH PROJECT
+
+This project was mainly created with the use of <https://github.com/saoudrizwan/claude-dev>. You can see each request in the git history. Manual tasks are prefixed. Main problem was the daily rate limit. It took 5 days in total and a cost of 5.11$.
+
+### Steps took
+
+1. Think about a game idea. I took reference from <https://contexto.me/> and wanted to try it with embeddings.
+2. I wrote with ChatGPT to get a game plan to build this app. You can see the result in [GameIdea.md](/GameIdea.md).
+3. Setup the project with shadcn and nextjs via `npx shadcn@latest init`. [More information](https://ui.shadcn.com/docs/installation/next)
+4. Add components you think you might need via `npx shadcn@latest add` and install packages.
+5. Let Claude-dev write the code
 
 ## Features
 
 - Daily word generation
 - Word input and evaluation based on semantic similarity using OpenAI embeddings
-- Color-coded attempt history with similarity scores
+- Attempt history with similarity scores
 - Hint system (3 hints per game) with past hints display
 - Progress saving using local storage
 - Archive of past words for continuous play
@@ -22,7 +34,7 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 - UI: shadcn components and Tailwind CSS
 - State Management: React Hooks
 - Animations: Framer Motion
-- API Integration: OpenAI API for text embeddings (server-side only)
+- API Integration: JINA AI API for text embeddings (server-side only)
 
 ## Getting Started
 
@@ -31,7 +43,7 @@ To run the Kontexti game locally, follow these steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/kontexti.git
+   git clone https://github.com/neonize/kontexti.git
    cd kontexti
    ```
 
@@ -45,14 +57,14 @@ To run the Kontexti game locally, follow these steps:
    Create a `.env.local` file in the root directory and add your OpenAI API key:
 
    ```bash
-   OPENAI_API_KEY=your_api_key_here
+   JINA_API_KEY=your_api_key_here
    ```
 
    IMPORTANT:
-   - You must have an OpenAI account and API key for the similarity calculation to work. If you don't have one, sign up at <https://openai.com/> and create an API key.
+   - You must have an JINA API key for the similarity calculation to work. If you don't have one, create one at <https://jina.ai/#apiform> for free.
    - The API key is only used server-side in the API route, ensuring it's not exposed to the client.
    - Keep your API key secret! Never commit your `.env.local` file to version control or share it publicly.
-   - If you accidentally expose your API key, immediately revoke it and generate a new one from your OpenAI account dashboard.
+   - If you accidentally expose your API key, immediately revoke it and generate a new one!
 
 4. Run the development server:
 
@@ -113,7 +125,3 @@ This project is open source and available under the [MIT License](LICENSE).
 - If you encounter any issues with the similarity calculation, make sure your OpenAI API key is correctly set in the `.env.local` file and that you have sufficient credits in your OpenAI account.
 - If the game is not saving progress or seems to reset unexpectedly, check that your browser allows local storage for the site.
 - For any other issues, please check the browser console for error messages and report them in the GitHub issues section of this repository.
-
-## Security Note
-
-Never share your OpenAI API key or commit it to version control. The `.env.local` file is included in `.gitignore` to prevent accidental commits. The API key is only used server-side, ensuring it's not exposed to the client. If you believe your API key has been exposed, revoke it immediately from your OpenAI account and generate a new one.
