@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 // Array of words for the game
 const words = [
   'apple', 'banana', 'cherry', 'date', 'elderberry',

@@ -17,7 +17,7 @@ This project was mainly created with the use of <https://github.com/saoudrizwan/
 ## Features
 
 - Daily word generation
-- Word input and evaluation based on semantic similarity using OpenAI embeddings
+- Word input and evaluation based on semantic similarity using JINA embeddings
 - Attempt history with similarity scores
 - Hint system (3 hints per game) with past hints display
 - Progress saving using local storage
@@ -54,7 +54,7 @@ To run the Kontexti game locally, follow these steps:
    ```
 
 3. Set up environment variables:
-   Create a `.env.local` file in the root directory and add your OpenAI API key:
+   Create a `.env.local` file in the root directory and add your JINA API key:
 
    ```bash
    JINA_API_KEY=your_api_key_here
@@ -76,6 +76,8 @@ To run the Kontexti game locally, follow these steps:
 
 ## Verifying the Setup
 
+Either test the app on `http://localhost:3000` or use the following steps to only test the backend:
+
 To ensure that your setup is working correctly, especially the API endpoint for similarity calculation:
 
 1. Start the development server if it's not already running.
@@ -94,9 +96,9 @@ To ensure that your setup is working correctly, especially the API endpoint for 
    ```
 
 4. If you receive an error or no response, check the following:
-   - Ensure your OPENAI_API_KEY is correctly set in the .env.local file.
+   - Ensure your JINA_API_KEY is correctly set in the .env.local file.
    - Check the server logs for any error messages.
-   - Verify that your OpenAI account has sufficient credits.
+   - Verify that your JINA.ai key has sufficient credits.
 
 ## How to Play
 
@@ -115,6 +117,7 @@ To ensure that your setup is working correctly, especially the API endpoint for 
 ## Contributing
 
 Contributions to Kontexti are welcome! Please feel free to submit a Pull Request.
+Please provide information if you have used any AI tools!
 
 ## License
 
@@ -122,6 +125,6 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Troubleshooting
 
-- If you encounter any issues with the similarity calculation, make sure your OpenAI API key is correctly set in the `.env.local` file and that you have sufficient credits in your OpenAI account.
+- If you encounter any issues with the similarity calculation, make sure your JINA API key is correctly set in the `.env.local` file and that you have sufficient credits left.
 - If the game is not saving progress or seems to reset unexpectedly, check that your browser allows local storage for the site.
 - For any other issues, please check the browser console for error messages and report them in the GitHub issues section of this repository.
