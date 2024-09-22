@@ -237,14 +237,14 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
               className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded"
             >
               <span>{attempt.word}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-32">
                 {attempt.score === null ? (
-                  <Skeleton className="w-24 h-4" />
+                  <Skeleton className="w-full h-4" />
                 ) : (
-                  <>
-                    <Progress value={attempt.score} className={`w-24 ${getColorForScore(attempt.score)}`} />
-                    <span className="text-sm font-semibold">{attempt.score}%</span>
-                  </>
+                  <div className="w-full flex items-center">
+                    <Progress value={attempt.score} className={`flex-grow ${getColorForScore(attempt.score)}`} />
+                    <span className="text-sm font-semibold ml-2 w-8 text-right">{attempt.score}%</span>
+                  </div>
                 )}
               </div>
             </motion.li>

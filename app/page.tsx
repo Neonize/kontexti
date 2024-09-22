@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import KontextiGame from '../components/KontextiGame';
-import WordArchive from '../components/WordArchive';
+import WordArchiveWithToday from '../components/WordArchiveWithToday';
 import GameInstructions from '../components/GameInstructions';
 import { getWordOfTheDay } from '../lib/gameUtils';
 import { ThemeToggle } from '../components/theme-toggle';
@@ -62,7 +62,7 @@ export default function Home() {
         </div>
         <div className="flex-1 flex flex-col gap-4">
           <GameInstructions />
-          <WordArchive onSelectWord={handleSelectWord} />
+          <WordArchiveWithToday onSelectWord={handleSelectWord} onResetToDaily={handleResetToDaily} />
         </div>
       </motion.main>
       <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
