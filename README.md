@@ -1,5 +1,7 @@
 # Kontexti - Word Guessing Game
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FNeonize%2Fkontexti&env=JINA_API_KEY&envDescription=API%20key%20for%20similarity%20calculation%20via%20Jina.ai&envLink=https%3A%2F%2Fjina.ai%2F%23apiform&demo-title=Kontexti&demo-description=Find%20the%20semantically%20nearest%20word%20&demo-url=https%3A%2F%2Fkontexti.vmartens.de&demo-image=https%3A%2F%2Fgithub.com%2FNeonize%2Fkontexti%2Fblob%2Fmain%2FGameView.png%3Fraw%3Dtrue)
+
 Kontexti is a daily word guessing game where players attempt to guess a secret word by entering semantically similar words. The game provides similarity scores based on the semantic proximity of the guessed words to the secret word, using JINA.ai's text embedding model.
 
 ## AI RESEARCH PROJECT
