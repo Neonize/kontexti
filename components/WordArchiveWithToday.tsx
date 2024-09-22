@@ -14,15 +14,15 @@ const WordArchiveWithToday: React.FC<WordArchiveWithTodayProps> = ({ onSelectWor
   const pastWords = getPastWords(7); // Get past 7 days' words
 
   return (
-    <Card className="w-full bg-white dark:bg-gray-800">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Word Archive</CardTitle>
+        <CardTitle>Other words to try</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button onClick={onResetToDaily} variant="outline" className="w-full">
           Play Today's Challenge
         </Button>
-        <Separator className="my-4" />
+        <Separator />
         <ul className="space-y-2">
           {pastWords.map((word, index) => {
             const date = new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000);

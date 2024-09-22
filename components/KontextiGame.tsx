@@ -12,7 +12,6 @@ import {
   calculateSimilarity,
   getHint,
   formatDate,
-  getColorForScore,
   calculateTotalPoints,
   GameState
 } from '../lib/gameUtils';
@@ -141,7 +140,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
 
   if (isLoading) {
     return (
-      <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
+      <Card className="w-full p-6 shadow-lg">
         <Skeleton className="w-full h-8 mb-4" />
         <Skeleton className="w-full h-10 mb-2" />
         <div className="flex gap-2">
@@ -154,9 +153,8 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
   }
 
   return (
-    <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
+    <Card className="w-full p-6 shadow-lg">
       <div className="mb-4 flex flex-col items-center">
-        <h2 className="text-3xl font-bold mb-2">Kontexti</h2>
         <Badge variant={customWord ? "secondary" : "default"} className="cursor-pointer" onClick={onResetToDaily}>
           {customWord ? "Archive Word" : `Today's Word (${formatDate(new Date())})`}
         </Badge>
@@ -190,7 +188,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Enter a word"
-          className="mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="mb-2 text-gray-900 dark:text-white"
           disabled={gameWon || givenUp}
           ref={inputRef}
         />
@@ -208,7 +206,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
       </form>
 
       {currentHint && (
-        <div className="mt-2 mb-4 p-2 bg-blue-50 dark:bg-blue-900 rounded">
+        <div className="mt-2 mb-4 p-2 rounded">
           <Badge variant="secondary">Hint</Badge>
           <p className="mt-1 text-sm">{currentHint}</p>
         </div>
@@ -234,7 +232,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded"
+              className="flex items-center justify-between p-2 rounded"
             >
               <span>{attempt.word}</span>
               <div className="flex items-center gap-2 w-32">
@@ -242,7 +240,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
                   <Skeleton className="w-full h-4" />
                 ) : (
                   <div className="w-full flex items-center">
-                    <Progress value={attempt.score} className={`flex-grow ${getColorForScore(attempt.score)}`} />
+                    <Progress value={attempt.score} className="flex-grow" />
                     <span className="text-sm font-semibold ml-2 w-8 text-right">{attempt.score}%</span>
                   </div>
                 )}

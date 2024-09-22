@@ -20,8 +20,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-4 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <header className="w-full max-w-4xl text-center mb-8 flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center justify-start p-4 text-gray-900 dark:text-gray-100">
+      <header className="w-full max-w-4xl text-center mb-6 flex flex-col items-center">
         <motion.h1
           className="text-4xl font-bold mb-2 cursor-pointer"
           initial={{ opacity: 0, y: -20 }}
@@ -66,7 +66,7 @@ export default function Home() {
         </div>
       </motion.main>
       <footer className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-        © 2023 Kontexti. All rights reserved.
+        © 2024 Kontexti. All rights reserved.
       </footer>
     </div>
   );

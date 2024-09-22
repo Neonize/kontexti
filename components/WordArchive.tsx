@@ -12,14 +12,14 @@ const WordArchive: React.FC<WordArchiveProps> = ({ onSelectWord }) => {
   const today = new Date();
 
   return (
-    <Card className="w-full p-6 bg-white dark:bg-gray-800 shadow-lg">
+    <Card className="w-full p-6 shadow-lg">
       <h2 className="text-xl font-semibold mb-4">Word Archive</h2>
       <ul className="space-y-2">
         {pastWords.map((word, index) => {
           const date = new Date(today);
           date.setDate(today.getDate() - index - 1);
           return (
-            <li key={index} className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
+            <li key={index} className="flex justify-between items-center p-2 rounded">
               <span className="text-sm">{formatDate(date)}</span>
               <Button variant="outline" size="sm" onClick={() => onSelectWord(word)}>
                 Play

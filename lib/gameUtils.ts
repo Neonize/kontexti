@@ -83,12 +83,6 @@ export const formatDate = (date: Date): string => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export const getColorForScore = (score: number): string => {
-  if (score < 33) return 'bg-red-500';
-  if (score < 66) return 'bg-yellow-500';
-  return 'bg-green-500';
-};
-
 export const calculateTotalPoints = (attempts: number, hintsUsed: number): number => {
   const basePoints = 1000;
   const pointsPerAttempt = 50;
