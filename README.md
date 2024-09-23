@@ -6,7 +6,9 @@ Kontexti is a daily word guessing game where players attempt to guess a secret w
 
 ## AI RESEARCH PROJECT
 
-This project was mainly created with the use of <https://github.com/saoudrizwan/claude-dev>. You can see each request in the git history. Manual tasks are prefixed. Main problem was the daily rate limit. It took 5 days in total and a cost of 5.11$.
+This project was mainly created with the use of <https://github.com/saoudrizwan/claude-dev>. You can see each request in the git history. Manual tasks are prefixed. Main problem was the daily rate limit. It took 5 days in total and a cost of under 6 $.
+While 5 days sound much, the complete time might have been around 6 hours and most of it waiting thanks to the bad internet in german trains. Case in point, a `npm install` while writting this sentence took over 30 minutes...
+Without rate limits and with good internet the project may could have been finished in under 3 hours.
 
 ### Steps took
 
