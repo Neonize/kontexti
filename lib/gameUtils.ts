@@ -1,10 +1,4 @@
-// Array of words for the game
-const words = [
-  'apple', 'banana', 'cherry', 'date', 'elderberry',
-  'fig', 'grape', 'honeydew', 'kiwi', 'lemon',
-  'mango', 'nectarine', 'orange', 'papaya', 'quince',
-  'raspberry', 'strawberry', 'tangerine', 'ugli fruit', 'watermelon'
-];
+import { words } from './words';
 
 export const getWordOfTheDay = (): string => {
   const today = new Date();
