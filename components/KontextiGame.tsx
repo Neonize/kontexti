@@ -240,7 +240,7 @@ const KontextiGame: React.FC<KontextiGameProps> = ({ customWord, onResetToDaily 
                   <Skeleton className="w-full h-4" />
                 ) : (
                   <div className="w-full flex items-center">
-                    <Progress value={attempt.score} className="flex-grow" />
+                    <Progress value={attempt.score} className="grow" />
                     <span className="text-sm font-semibold ml-2 w-8 text-right">{attempt.score}%</span>
                   </div>
                 )}
